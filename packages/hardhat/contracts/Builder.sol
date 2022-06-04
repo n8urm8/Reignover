@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 
 import "./libs/Editor.sol";
 import "./interfaces/IKingdoms.sol";
-import "./interfaces/IERC20.sol";
+import "./interfaces/IResourceToken.sol";
 import "./interfaces/IResourceManager.sol";
 
 // Setup: set ResourceManager as editor of this contract, this contract also needs to be an editor of ResourceManager
@@ -23,7 +23,6 @@ contract Builder is Editor {
     // wallet > cityId > buildingId > time until ready
     mapping(address => mapping(uint => mapping(uint => uint))) public buildingQueue; 
 
-    event NewResource(uint id, address resource);
     event NewBuildingLevelRequirements(uint indexed buildingId, uint[] levelRequirements);
     event NewBuildingResourceRequirements(uint indexed buildingId, uint[] resourceRequirements);
     event NewBuildingMaxLevel(uint indexed buildingId, uint maxLevel);
@@ -125,13 +124,11 @@ contract Builder is Editor {
     */
     function addResource(address _resourceAddress) external onlyEditor {
         resources.push(_resourceAddress);
-        emit NewResource(resources.length-1, _resourceAddress);
     }
 
     /** @notice only to be used if a token needs to be replaced */
     function editResource(uint _id, address _newAddress) external onlyOwner {
         resources[_id] = _newAddress;
-        emit NewResource(_id, _newAddress);
     }
 
     function getResourceCount() external view returns(uint) {
@@ -150,7 +147,7 @@ contract Builder is Editor {
         uint[] memory resourceCost = getCostOfNextLevel(cityBuildingLevels, _buildingId);
         for (uint i = 0; i < resources.length; i++) {
             if (resourceCost[i] > 0) {
-                IERC20(resources[i]).burnFrom(msg.sender, resourceCost[i]);
+                IResourceToken(resources[i]).burnFrom(msg.sender, resourceCost[i]);
             }
         }
         uint timeCost = getNextLevelTimeRequirement(cityBuildingLevels, _buildingId);

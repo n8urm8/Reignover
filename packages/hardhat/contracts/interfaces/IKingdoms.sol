@@ -9,4 +9,6 @@ interface IKingdoms {
     function getCityOwner(uint _cityId) external view returns(address);
     function getCityBuildingsWithLevel(uint _cityId) external view returns(uint[] memory);
     function getOwnerCities(address _owner) external view returns(uint[] memory);
+    function addResource(address _resourceAddress) external;
+    function getTotalForges(address _player) external view returns(uint);
 }
